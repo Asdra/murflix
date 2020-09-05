@@ -3,3 +3,4 @@ node_modules/*
 .theia/*
 deploy.sh
 ytdl/*
+nas/

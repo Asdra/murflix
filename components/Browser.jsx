@@ -1,77 +1,28 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { withContextMenu } from '../components/ContextMenu';
+import BrowserItem from '../components/BrowserItem';
 
-function marquee({ target }) {
+export default withContextMenu(
+    ({ files, token, onContextMenu }) => {
+        const files_elems = files.map(file => {
+            const downloadURL = new URL("/api/browser", location.origin);
+            downloadURL.search = new URLSearchParams({
+                download: 1,
+                token,
+                href: file.href
+            });
 
-    const elem = target.closest(".fileItem").querySelector(".fileItem_name");
+            return <BrowserItem file={file} href={{ pathname: "/", query: { path: file.href, token } }} key={file.href} />
 
-    if (elem?.scrollIntervalId == null) {
-        elem.scrollIntervalId = 0;
-        setTimeout(() => {
-            elem.scrollIntervalId = setInterval(function () {
-                this.scroll(this.scrollLeft + 1, 0);
-
-                if (!this.parentNode.matches(':hover')) {
-                    clearInterval(this.scrollIntervalId);
-                    this.scrollIntervalId = null;
-                    this.scroll(0, 0);
-                }
-
-            }.bind(elem), 6);
-        },
-            1000);
-    }
-}
-
-export default ({ files, token }) => {
-    const files_elems = files.map(file => {
-        const downloadURL = new URL("/api/browser", location.origin);
-        downloadURL.search = new URLSearchParams({
-            download: 1,
-            token,
-            href: file.href
         });
 
         return (
-            <Link as={file.href} href={{ pathname: "/", query: { path: file.href, token } }} key={file.href}>
-                <li className={`fileItem ${file.isDir ? "dir" : "file"}`} onMouseOver={marquee}>
-                    <img className="fileItem_icon" src={file.iconHref}></img>
-                    <div className="fileItem_name">
-                        <div>
-                            {file.name.replace(/_/g, " ")}
-                        </div>
-                    </div>
-                    <div className="fileItem_download_wrapper">
-                        <div className="fileItem_download">
-                            {!file.isDir && (file.extension !== "mfg")
-                                &&
-                                <a
-                                    href={downloadURL.toString()}
-                                    onClick={(e) => {
-                                        let aElem = e.target;
-                                        while (aElem.tagName != "A") {
-                                            aElem = aElem.parentNode;
-                                        }
-                                        e.preventDefault();
-                                        window.open(aElem.href);
-                                    }}>
-                                    <FontAwesomeIcon icon="download" alt="Télécharger" />
-                                </a>
-                            }
-                        </div>
-                    </div>
-                </li>
-            </Link>
-        );
-    });
-
-
-    return (
-        <div id="browser_wrapper">
-            <ul id="browser">
-                {files_elems}
-            </ul>
-            <style jsx>{`
+            <div id="browser_wrapper" onContextMenu={onContextMenu}>
+                <ul id="browser">
+                    {files_elems}
+                </ul>
+                <style jsx>{`
 
                 #browser_wrapper {
                     overflow-x: auto;
@@ -147,6 +98,6 @@ export default ({ files, token }) => {
                 }
             `}</style>
 
-        </div>
-    )
-}
+            </div>
+        )
+    }, [{ libelle: "Browser", action: (props) => console.log("browser", props) }]);

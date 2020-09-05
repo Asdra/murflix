@@ -5,15 +5,17 @@ import FileHandler from '../components/FileHandler';
 import Login from '../components/Login';
 import { withRouter } from 'next/router';
 
-import { useState, useEffect } from 'react';
+import { withContextMenu } from '../components/ContextMenu';
 
-const Main = ({ router }) => {
+import { useState, useEffect, createContext } from 'react';
+
+const Main = ({ router, onContextMenu }) => {
 
     const [token, setToken] = useState((typeof sessionStorage === "object") ? sessionStorage.getItem("murflix_token") : null);
     const [file, setFile] = useState(null);
     const [path, setPath] = useState(router.asPath ?? "/");
 
-    router.events.on('routeChangeComplete', function(url) {
+    router.events.on('routeChangeComplete', function (url) {
         if (url) {
             setPath(decodeURIComponent(url));
         }
@@ -54,9 +56,10 @@ const Main = ({ router }) => {
         </>);
     }
 
-    return (
-        <div id="wrapper">
+    const contextMenu = ["Main"];
 
+    return (
+        <div id="wrapper" onContextMenu={onContextMenu}>
             {displayMe}
 
             <style jsx>{`
@@ -104,4 +107,5 @@ const Main = ({ router }) => {
     );
 }
 
-export default withRouter(Main);
+
+export default withRouter(withContextMenu(Main, [{ libelle: "Main", action: () => console.log("Main") }]));
