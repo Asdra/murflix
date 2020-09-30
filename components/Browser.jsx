@@ -13,7 +13,7 @@ export default withContextMenu(
                 href: file.href
             });
 
-            return <BrowserItem file={file} href={{ pathname: "/", query: { path: file.href, token } }} key={file.href} />
+            return <BrowserItem file={file} href={{ pathname: "/", query: { path: file.href, token } }} key={file.href} token={token} downloadURL={downloadURL} />
 
         });
 
@@ -37,7 +37,7 @@ export default withContextMenu(
 
                     max-width: 100%;
 
-                    column-width: 50rem;
+                    column-width: 20rem;
                     column-count: auto;
                     column-fill: auto;
 
@@ -50,15 +50,12 @@ export default withContextMenu(
                 }
 
                 #browser :global(.fileItem) {
-
-                    line-height: 2.5em;
-
+                    line-height: 2em;
                     display: flex;
                     align-items: center;
                     justify-content: flex-start;
-
                     list-style-type: none;
-                    padding: 0 1em;
+                    padding: 0 0.5em;
                     font-size: 1.5em;
                     cursor: pointer;
                 }
@@ -81,7 +78,9 @@ export default withContextMenu(
 
                 #browser :global(.fileItem_icon) {
                     height: 1.5em;
-                    padding-right: 1em;
+                    padding-right: 0.5em;
+                    max-width: 1.5em;
+                    height: auto;
                 }
 
                 #browser :global(.fileItem_name) {

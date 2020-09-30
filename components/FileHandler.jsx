@@ -1,27 +1,29 @@
 import GameFrame from './GameFrame';
-import Player from './Player';
+import VideoPlayer from './VideoPlayer';
 import PDF from './PDF';
 import Image from './Image';
+import { useRouter } from 'next/router';
 
-export default ({ file, token }) => {
+const mfgs = ["mfg"];
+const pdfs = ["pdf"];
+const images = ["jpeg", "jpg", "bmp", "png", "tiff"];
+const videos = ["avi", "mkv", "mp4", "mpeg", "mov", "webm"];
 
-    switch (file.extension) {
-        case "mfg":
+export default ({ router, file, token }) => {
+
+    switch (true) {
+        case mfgs.includes(file.extension):
             return <GameFrame file={file} token={token} />;
             break;
-        case "pdf":
+        case pdfs.includes(file.extension):
             return <PDF file={file} token={token} />;
             break;
-        case "jpeg":
-        case "jpg":
-        case "bmp":
-        case "png":
-        case "tiff":
+        case images.includes(file.extension):
             return <Image file={file} token={token} />
             break;
-
-        default:
-            return <Player file={file} token={token} />;
+        case videos.includes(file.extension):
+            return <VideoPlayer file={file} token={token} />
+            break;
     }
 
-}
+};

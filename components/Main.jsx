@@ -3,56 +3,51 @@ import Browser from "../components/Browser";
 import Arianne from '../components/Arianne';
 import FileHandler from '../components/FileHandler';
 import Login from '../components/Login';
+import MusicControls from '../components/MusicControls';
+import * as MusicPlayer from "../lib/musicPlayer.js";
 import { withRouter } from 'next/router';
-
 import { withContextMenu } from '../components/ContextMenu';
-
 import { useState, useEffect, createContext } from 'react';
 
 const Main = ({ router, onContextMenu }) => {
 
     const [token, setToken] = useState((typeof sessionStorage === "object") ? sessionStorage.getItem("murflix_token") : null);
     const [file, setFile] = useState(null);
-    const [path, setPath] = useState(router.asPath ?? "/");
+    const [mpState, setMpState] = useState(MusicPlayer.getState());
+    MusicPlayer.suscribe(setMpState);
 
-    router.events.on('routeChangeComplete', function (url) {
-        if (url) {
-            setPath(decodeURIComponent(url));
-        }
-    });
-
-    useEffect(() => {
-        if (file === null || file.href != path) {
-            fetch("/api/browser?path=" + path + "&token=" + token).then((resp, err) => {
-                if (err) {
-                    location.href = "/";
-                    return;
-                }
-                if (resp.status == 405) {
-                    setToken(null);
-                    return;
-                }
-                resp.json().then(file => {
-                    setFile(file);
+    if (file == null || router.asPath !== file.asPath) {
+        fetch("/api/browser?path=" + router.asPath + "&token=" + token).then((resp, err) => {
+            if (err) {
+                location.href = "/";
+                return;
+            }
+            if (resp.status == 405) {
+                setToken(null);
+                return;
+            }
+            resp.json().then(file => {
+                setFile({
+                    asPath: router.asPath,
+                    ...file
                 });
             });
-        }
-    }, [path, token]);
+        });
+    }
 
-    let displayMe = null;
-
+    let displayMe = <><Topbar token={token} />
+        {file && <Arianne path={file.arrayPath} token={token} />}
+    </>;
     if (token == null) {
         displayMe = <Login setToken={setToken} />;
-    } else if (file !== null) {
+    } else if (file !== null && file.asPath == router.asPath) {
         displayMe = (<>
-            <Topbar token={token} />
-            <Arianne path={file.arrayPath} token={token} />
-
-
+            {displayMe}
             {(file.isDir) ?
                 <Browser files={file.children} token={token} />
                 :
                 <FileHandler file={file} token={token} />}
+            <MusicControls />
         </>);
     }
 
@@ -77,7 +72,7 @@ const Main = ({ router, onContextMenu }) => {
                             height: 100%;
                             margin: 0;
                             padding: 0;
-                            background-color: #444;
+                            background-color: #484546;
                             font-family: Calibri;
                             color: #ccc;
                         }

@@ -2,27 +2,37 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { withContextMenu } from '../components/ContextMenu';
 import { useEffect, useState } from 'react';
+import * as MusicPlayer from '../lib/musicPlayer.js';
+import { marquee } from '../lib/utils.js';
 
-function marquee({ target }) {
-
-    const elem = target.closest(".fileItem").querySelector(".fileItem_name");
-
-    if (elem ?.scrollIntervalId == null) {
-        elem.scrollIntervalId = 0;
-        setTimeout(() => {
-            elem.scrollIntervalId = setInterval(function () {
-                this.scroll(this.scrollLeft + 1, 0);
-
-                if (!this.parentNode.matches(':hover')) {
-                    clearInterval(this.scrollIntervalId);
-                    this.scrollIntervalId = null;
-                    this.scroll(0, 0);
+function musicItem(file, token, onContextMenu, downloadURL) {
+    return <li onClick={() => MusicPlayer.test(file, token)} onContextMenu={onContextMenu} className={`fileItem ${file.isDir ? "dir" : "file"}`}>
+        <img className="fileItem_icon" src={file.iconHref}></img>
+        <div className="fileItem_name">
+            <div onMouseOver={(e) => { e.stopPropagation; marquee(e.target, true); }}>
+                {file.name.replace(/_/g, " ")}
+            </div>
+        </div>
+        <div className="fileItem_download_wrapper">
+            <div className="fileItem_download">
+                {(!file.isDir && file.extension !== "mfg")
+                    &&
+                    <a
+                        href={downloadURL.toString()}
+                        onClick={(e) => {
+                            let aElem = e.target;
+                            while (aElem.tagName != "A") {
+                                aElem = aElem.parentNode;
+                            }
+                            e.preventDefault();
+                            window.open(aElem.href);
+                        }}>
+                        <FontAwesomeIcon icon="download" alt="Télécharger" />
+                    </a>
                 }
-
-            }.bind(elem), 6);
-        },
-            1000);
-    }
+            </div>
+        </div>
+    </li>
 }
 
 const contextMenu = [{
@@ -32,7 +42,11 @@ const contextMenu = [{
     }
 }];
 
-export default withContextMenu(({ file, token, onContextMenu }) => {
+export default withContextMenu(({ file, token, onContextMenu, downloadURL }) => {
+
+    if (file.extension == "mp3") {
+        return musicItem(file, token, onContextMenu, downloadURL);
+    }
 
     return <Link as={file.href} href={{ pathname: "/", query: { path: file.href, token } }} key={file.href} >
         <li onContextMenu={onContextMenu} className={`fileItem ${file.isDir ? "dir" : "file"}`} onMouseOver={marquee}>
@@ -44,7 +58,7 @@ export default withContextMenu(({ file, token, onContextMenu }) => {
             </div>
             <div className="fileItem_download_wrapper">
                 <div className="fileItem_download">
-                    {!file.isDir && (file.extension !== "mfg")
+                    {(!file.isDir && file.extension !== "mfg")
                         &&
                         <a
                             href={downloadURL.toString()}

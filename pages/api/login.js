@@ -15,7 +15,7 @@ export default async (req, res) => {
         return;
     }
 
-    if (!body.password || body.password !== "apéroger") {
+    if (!body.password || body.password !== "awesomePassword") {
         res.statusCode = 405;
         res.end();
         return;
