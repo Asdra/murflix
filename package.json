@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^13.9.1",
-    "video.js": "^7.7.5"
+    "video.js": "^7.20.3"
   },
   "browser": {
     "fs": false
